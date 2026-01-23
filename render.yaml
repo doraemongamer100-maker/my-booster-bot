@@ -1,0 +1,16 @@
+# Exported from Render on 2026-01-23T06:35:25Z
+version: "1"
+projects:
+- name: My project
+  environments:
+  - name: Production
+    services:
+    - type: web
+      name: my-booster-bot
+      runtime: python
+      repo: https://github.com/doraemongamer100-maker/my-booster-bot
+      plan: free
+      region: oregon
+      buildCommand: pip install -r requirements.txt
+      startCommand: gunicorn app:app
+      autoDeployTrigger: commit
