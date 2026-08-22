@@ -27,7 +27,6 @@ if (isset($update['callback_query'])) {
         $tasks = getTasksList();
         $selectedTask = $tasks[$taskIndex] ?? "Unknown Task";
 
-        // Store selected task temporarily (Aap yahan database/session use kar sakte hain)
         $text = "✅ *Task Selected*\n🎯 " . $selectedTask . "\n\n*Send your tracking URL*\n\n📌 *Example:*\n`https://app.adjust.com...`";
         
         $keyboard = [
@@ -66,61 +65,29 @@ if (isset($update['message'])) {
             exit;
         }
 
-        // 1. URL se Click ID / Parameters extract karna
+        // URL se Click ID extract karna
         $parsedUrl = parse_url($text);
         parse_str($parsedUrl['query'] ?? '', $queryParams);
         
-        // Aapke tracking link ke hisaab se clickid key change ho sakti hai (jaise click_id, clickid, chid, etc.)
         $clickId = $queryParams['clickid'] ?? $queryParams['click_id'] ?? $queryParams['subid'] ?? '6a8860ce7789396658953bb3';
 
-        // 2. Initial Tracking Started Message Send Karna
-        $responseMsg = apiRequest("sendMessage", [
+        // Initial Progress Message
+        $stepsOutput = "";
+        for ($s = 1; $s <= 10; $s++) {
+            $stepsOutput .= "$s. Step $s ✅\n";
+        }
+
+        $finalText = "🆔 `{$clickId}`    100%\n\n" .
+                     "🟢 (10/10)\n\n" .
+                     "🎯 Step Completed\n" .
+                     "🟢 SUCCESS (200)\n\n" .
+                     "*Steps:*\n" . $stepsOutput;
+
+        apiRequest("sendMessage", [
             'chat_id' => $chatId,
-            'text' => "🚀 *Tracking Started*\n\n🎯 Vivago\n🆔 Click ID\n`{$clickId}`\n\n⏳ Processing started...",
+            'text' => $finalText,
             'parse_mode' => 'Markdown'
         ]);
-
-        if ($responseMsg && isset($responseMsg['result']['message_id'])) {
-            $msgId = $responseMsg['result']['message_id'];
-
-            // 3. Postback Trigger Karna (Yahan aap apna postback URL ya tracking server hit karenge)
-            // Example Postback URL hit:
-            // $postbackUrl = "https://your-tracking-domain.com/postback?clickid=" . $clickId;
-            // @file_get_contents($postbackUrl);
-            
-            // Simulating network delay for postback & execution
-            sleep(2);
-
-            // 4. Live Multi-step Progress Update (10% to 100%)
-            for ($i = 1; $i <= 10; $i++) {
-                $percent = $i * 10;
-                $stepsOutput = "";
-                for ($s = 1; $s <= 10; $s++) {
-                    if ($s <= $i) {
-                        $stepsOutput .= "$s. Step $s ✅\n";
-                    } else {
-                        $stepsOutput .= "$s. Step $s ⏳\n";
-                    }
-                }
-
-                $progressText = "🆔 `{$clickId}`    {$percent}%\n\n" .
-                                "🟢 ({$i}/10)\n\n" .
-                                "🎯 Step Completed\n" .
-                                "🟢 SUCCESS (200)\n\n" .
-                                "*Steps:*\n" . $stepsOutput;
-
-                apiRequest("editMessageText", [
-                    'chat_id' => $chatId,
-                    'message_id' => $msgId,
-                    'text' => $progressText,
-                    'parse_mode' => 'Markdown'
-                ]);
-
-                if ($i < 10) {
-                    usleep(500000); // 0.5 second delay per step for smooth animation
-                }
-            }
-        }
     }
 }
 
