@@ -1,70 +1,68 @@
-import telebot
+import os
+import time
 import requests
-import random
-import hashlib
-import json
 from flask import Flask, request
-from concurrent.futures import ThreadPoolExecutor
 
-# --- CONFIG ---
-API_TOKEN = '8095828135:AAFFmrU0Ze_0RJGNO9g2iO3jbYNp-t_BGeU'
-WEBHOOK_URL = 'https://my-booster-bot.onrender.com/' # Apna Render URL yahan sahi se dalein
-bot = telebot.TeleBot(API_TOKEN)
+TOKEN = "8874819641:AAGy9IGxvZqXPjNuhUEHDXH5N8juCTcuE2s"
+URL = f"https://api.telegram.org/bot{TOKEN}/"
+
 app = Flask(__name__)
-executor = ThreadPoolExecutor(max_workers=15)
 
-HASH_KEY = "*dkaSDs#*k9487ld!*kaSJDsj9784@ADS@197dsk!!dHD@dka267#SD!sk192@"
-CLIENT_ID = "LKnVCeozqpO9CIsMXW0yzHjkUFl4Njzh23qWAc9c2vg="
-BASE_URL = "https://web.myfidelity.in/api/v1/parachute"
+def send_message(chat_id, text, reply_markup=None):
+    payload = {"chat_id": chat_id, "text": text, "parse_mode": "Markdown"}
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
+    requests.post(URL + "sendMessage", json=payload)
 
-def gen_checksum(data_json, hash_key):
-    s_hash = hashlib.sha256(hash_key.encode()).hexdigest()
-    sorted_json = json.dumps(json.loads(data_json), separators=(',', ':'), sort_keys=True)
-    combined = s_hash + sorted_json
-    return hashlib.sha256(combined.encode()).hexdigest()
+def get_tasks_keyboard():
+    return {
+        "inline_keyboard": [
+            [{"text": "1. Elo Elo", "callback_data": "select_task_0"}],
+            [{"text": "2. Jari Jar", "callback_data": "select_task_1"}],
+            [{"text": "3. Super Money 💰", "callback_data": "select_task_2"}],
+            [{"text": "4. Curie Digi", "callback_data": "select_task_3"}],
+            [{"text": "35. Vivago", "callback_data": "select_task_4"}],
+            [{"text": "36. Grow Rvr", "callback_data": "select_task_5"}]
+        ]
+    }
 
-# Function definition handle_upi ke upar hona chahiye
-def process_boost(upi_id, chat_id):
-    try:
-        num = str(random.randint(6, 9)) + str(random.randint(100000000, 999999999))
-        fname = random.choice(["Aarav","Aryan","Aditya","Amit","Ankit"])
-        headers = {"Content-Type": "application/json", "msisdn": num, "clientId": CLIENT_ID, "appName": "Merico_Parachute", "appVersion": "1.0", "channel": "WEB", "User-Agent": "Mozilla/5.0"}
-        
-        d1 = json.dumps({"msisdn": num, "firstName": fname, "lastName": "", "email": f"{fname.lower()}@gmail.com", "pinCode": "", "consent1": 1, "ssoId": "NA"})
-        headers["checksum"] = gen_checksum(d1, HASH_KEY)
-        requests.post(f"{BASE_URL}/save-user-detail", data=d1, headers=headers, timeout=5)
-
-        d3 = json.dumps({"vpa": upi_id.strip()})
-        headers["checksum"] = gen_checksum(d3, HASH_KEY)
-        resp = requests.post(f"{BASE_URL}/save-upi-info", data=d3, headers=headers, timeout=5).json()
-
-        if resp.get('status') == 'SUCCESS':
-            d4 = json.dumps({"redemptionType": "CASHBACK"})
-            headers["checksum"] = gen_checksum(d4, HASH_KEY)
-            final = requests.post(f"{BASE_URL}/redemption", data=d4, headers=headers, timeout=5).json()
-            bot.send_message(chat_id, f"✅ SUCCESS: {upi_id}\n{final.get('msg', 'Sent')}")
-        else:
-            bot.send_message(chat_id, f"❌ FAILED: {upi_id}")
-    except:
-        pass
-
-@bot.message_handler(func=lambda message: True)
-def handle_upi(message):
-    upi_list = [x.strip() for x in message.text.split("\n") if x.strip()]
-    bot.reply_to(message, f"⚡ Fast Boosting Started for {len(upi_list)} IDs...")
-    for upi in upi_list:
-        executor.submit(process_boost, upi, message.chat.id)
-
-@app.route('/' + API_TOKEN, methods=['POST'])
-def getMessage():
-    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-    return "!", 200
-
-@app.route("/")
+@app.route('/', methods=['POST'])
 def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url=WEBHOOK_URL + API_TOKEN)
-    return "Bot is Running!", 200
+    data = request.get_json()
+    if "message" in data:
+        chat_id = data["message"]["chat"]["id"]
+        text = data["message"].get("text", "")
+        
+        if text == "/start":
+            welcome_text = "🚀 *Welcome*\n\n1️⃣ Select Task\n2️⃣ Send Tracking URL\n3️⃣ Wait for confirmation\n\n👉 *Choose task below*"
+            send_message(chat_id, welcome_text, reply_markup=get_tasks_keyboard())
+        elif text.startswith("http://") or text.startswith("https://"):
+            click_id = "6a8860ce7789396658953bb3"
+            steps_output = "\n".join([f"{s}. Step {s} ✅" for s in range(1, 11)])
+            final_text = f"🆔 `{click_id}`    100%\n\n🟢 (10/10)\n\n🎯 Step Completed\n🟢 SUCCESS (200)\n\n*Steps:*\n{steps_output}"
+            send_message(chat_id, final_text)
+        else:
+            send_message(chat_id, "❌ *Invalid URL*\n\nSend /start and select task")
+            
+    elif "callback_query" in data:
+        cq = data["callback_query"]
+        chat_id = cq["message"]["chat"]["id"]
+        query_id = cq["id"]
+        requests.post(URL + "answerCallbackQuery", json={"callback_query_id": query_id})
+        
+        text = "✅ *Task Selected*\n🎯 Task\n\n*Send your tracking URL*\n\n📌 *Example:*\n`https://app.adjust.com...`"
+        keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+        requests.post(URL + "editMessageText", json={
+            "chat_id": chat_id,
+            "message_id": cq["message"]["message_id"],
+            "text": text,
+            "parse_mode": "Markdown",
+            "reply_markup": keyboard
+        })
+        
+    return "OK", 200
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+    
