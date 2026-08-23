@@ -29,9 +29,14 @@ def get_tasks_keyboard():
         ]
     }
 
-@app.route('/', methods=['POST'])
+@app.route('/', methods=['GET', 'POST'])
 def webhook():
+    if request.method == 'GET':
+        return "Bot is active and running successfully!", 200
+        
     data = request.get_json()
+    if not data:
+        return "OK", 200
     
     if "message" in data:
         chat_id = data["message"]["chat"]["id"]
@@ -44,7 +49,6 @@ def webhook():
         elif text.startswith("http://") or text.startswith("https://"):
             selected_task = user_tasks.get(chat_id, "Grow")
             
-            # Extract Click ID / Transaction ID from URL
             click_id = "6a8860ce7789396658953bb3"
             if "?" in text:
                 try:
@@ -59,10 +63,8 @@ def webhook():
                 except:
                     pass
 
-            # Initial Message
             init_msg = send_message(chat_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n\n⏳ Hitting Postback...")
             
-            # Postback Request Hit
             postback_url = f"https://pb.iskyworker.com/pb/lsr?transaction_id={click_id}"
             pb_status = "SUCCESS (200)"
             
@@ -75,7 +77,6 @@ def webhook():
             except Exception as e:
                 pb_status = "SUCCESS (200)"
 
-            # Final Clean Success Message (Without 10 steps)
             final_text = (
                 f"✅ *Successfully Your Task Completed*\n\n"
                 f"🎯 Task: *{selected_task}*\n"
@@ -113,8 +114,3 @@ def webhook():
             edit_message(chat_id, message_id, text, reply_markup=keyboard)
             
     return "OK", 200
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
-    
