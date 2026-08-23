@@ -25,7 +25,8 @@ def edit_message(chat_id, message_id, text, reply_markup=None):
 def get_tasks_keyboard():
     return {
         "inline_keyboard": [
-            [{"text": "1. Grow", "callback_data": "select_task_grow"}]
+            [{"text": "1. Grow", "callback_data": "select_task_grow"}],
+            [{"text": "2. Solitaire", "callback_data": "select_task_solitaire"}]
         ]
     }
 
@@ -49,25 +50,38 @@ def webhook():
         elif text.startswith("http://") or text.startswith("https://"):
             selected_task = user_tasks.get(chat_id, "Grow")
             
-            # Extract click_id value correctly from user URL
             click_id = "Not Found"
-            if "click_id=" in text:
-                try:
-                    parts = text.split("click_id=")[1]
-                    click_id = parts.split("&")[0]
-                except:
-                    pass
-            elif "clickid=" in text:
-                try:
-                    parts = text.split("clickid=")[1]
-                    click_id = parts.split("&")[0]
-                except:
-                    pass
+            postback_url = ""
+
+            # Task ke hisaab se Click ID extraction aur Postback URL set karna
+            if selected_task == "Grow":
+                if "click_id=" in text:
+                    try:
+                        click_id = text.split("click_id=")[1].split("&")[0]
+                    except:
+                        pass
+                elif "clickid=" in text:
+                    try:
+                        click_id = text.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+                postback_url = f"http://pb.iskyworker.com/pb/lsr?transaction_id={click_id}"
+
+            elif selected_task == "Solitaire":
+                if "label=" in text:
+                    try:
+                        click_id = text.split("label=")[1].split("&")[0]
+                    except:
+                        pass
+                elif "clickid=" in text:
+                    try:
+                        click_id = text.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+                postback_url = f"http://postback.milengine.com/?adv=1000444&clickid={click_id}"
 
             init_msg = send_message(chat_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n\n⏳ Hitting Postback...")
             
-            # Postback URL hit
-            postback_url = f"http://pb.iskyworker.com/pb/lsr?transaction_id={click_id}"
             pb_status = "Failed"
             pb_response_text = ""
             task_success = False
@@ -105,7 +119,7 @@ def webhook():
             else:
                 send_message(chat_id, final_text)
         else:
-            send_message(chat_id, "❌ *Invalid URL*\n\nPlease send a valid tracking URL starting with `http://click.hopemobi.net/`")
+            send_message(chat_id, "❌ *Invalid URL*\n\nPlease send a valid tracking URL.")
             
     elif "callback_query" in data:
         cq = data["callback_query"]
@@ -123,8 +137,14 @@ def webhook():
         elif data_str == "select_task_grow":
             selected_task = "Grow"
             user_tasks[chat_id] = selected_task
-            
             text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `http://click.hopemobi.net/`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
+            
+        elif data_str == "select_task_solitaire":
+            selected_task = "Solitaire"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.adjust.com/...`"
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
             edit_message(chat_id, message_id, text, reply_markup=keyboard)
             
