@@ -49,39 +49,42 @@ def webhook():
         elif text.startswith("http://") or text.startswith("https://"):
             selected_task = user_tasks.get(chat_id, "Grow")
             
-            click_id = "6a8860ce7789396658953bb3"
-            if "?" in text:
+            # Accurate Click ID extraction specifically targeting click_id=
+            click_id = "Not Found"
+            if "click_id=" in text:
                 try:
-                    query_part = text.split("?")[1]
-                    params = query_part.split("&")
-                    for p in params:
-                        if "=" in p:
-                            k, v = p.split("=", 1)
-                            if k.lower() in ["clickid", "click_id", "transaction_id", "subid", "id"]:
-                                click_id = v
-                                break
+                    parts = text.split("click_id=")[1]
+                    click_id = parts.split("&")[0]
+                except:
+                    pass
+            elif "clickid=" in text:
+                try:
+                    parts = text.split("clickid=")[1]
+                    click_id = parts.split("&")[0]
                 except:
                     pass
 
             init_msg = send_message(chat_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n\n⏳ Hitting Postback...")
             
+            # Postback Hit with exact click_id value
             postback_url = f"https://pb.iskyworker.com/pb/lsr?transaction_id={click_id}"
-            pb_status = "SUCCESS (200)"
+            pb_status = "Failed"
+            pb_response_text = ""
             
             try:
-                pb_res = requests.get(postback_url, timeout=5)
-                if pb_res.status_code == 200:
-                    pb_status = "SUCCESS (200)"
-                else:
-                    pb_status = f"SUCCESS ({pb_res.status_code})"
+                pb_res = requests.get(postback_url, timeout=10)
+                pb_response_text = pb_res.text.strip()
+                pb_status = f"Status {pb_res.status_code}"
             except Exception as e:
-                pb_status = "SUCCESS (200)"
+                pb_response_text = str(e)
+                pb_status = "Error"
 
             final_text = (
                 f"✅ *Successfully Your Task Completed*\n\n"
                 f"🎯 Task: *{selected_task}*\n"
                 f"🆔 Click ID: `{click_id}`\n"
-                f"🟢 Postback Status: *{pb_status}*"
+                f"🟢 Postback Status: *{pb_status}*\n"
+                f"📄 *PB Response:* `{pb_response_text}`"
             )
             
             if init_msg and "result" in init_msg:
@@ -90,7 +93,7 @@ def webhook():
             else:
                 send_message(chat_id, final_text)
         else:
-            send_message(chat_id, "❌ *Invalid URL*\n\nPlease send a valid tracking URL starting with http:// or https:// (e.g. `http://click.hopemobi.net/?clickid=YOUR_ID`)")
+            send_message(chat_id, "❌ *Invalid URL*\n\nPlease send a valid tracking URL.")
             
     elif "callback_query" in data:
         cq = data["callback_query"]
@@ -109,8 +112,13 @@ def webhook():
             selected_task = "Grow"
             user_tasks[chat_id] = selected_task
             
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:*\n`http://click.hopemobi.net/?clickid=YOUR_ID`"
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:*\n`http://click.hopemobi.net/click?id=...&click_id=YOUR_ID`"
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
             edit_message(chat_id, message_id, text, reply_markup=keyboard)
             
     return "OK", 200
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+    
