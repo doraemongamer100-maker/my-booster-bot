@@ -108,7 +108,7 @@ def webhook():
                         click_id = text.split("click_id=")[1].split("&")[0]
                     except:
                         pass
-                postback_url = f"http://pb.shangmaikj.com/pb/lsr?transaction_id={click_id}"
+                postback_url = f"http://pb.imxbidding.net/pb/lsr?transaction_id={click_id}"
 
             elif selected_task == "Uni":
                 if "clickid=" in text:
@@ -237,4 +237,4 @@ def webhook():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-            
+    
