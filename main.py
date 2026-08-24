@@ -28,7 +28,8 @@ def get_tasks_keyboard():
             [{"text": "1. Grow", "callback_data": "select_task_grow"}],
             [{"text": "2. Solitaire", "callback_data": "select_task_solitaire"}],
             [{"text": "3. Policy Bazaar", "callback_data": "select_task_policy"}],
-            [{"text": "4. Condivio", "callback_data": "select_task_condivio"}]
+            [{"text": "4. Condivio", "callback_data": "select_task_condivio"}],
+            [{"text": "5. Uni", "callback_data": "select_task_uni"}]
         ]
     }
 
@@ -108,6 +109,19 @@ def webhook():
                         pass
                 postback_url = f"http://pb.shangmaikj.com/pb/lsr?transaction_id={click_id}"
 
+            elif selected_task == "Uni":
+                if "clickid=" in text:
+                    try:
+                        click_id = text.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+                elif "click_id=" in text:
+                    try:
+                        click_id = text.split("click_id=")[1].split("&")[0]
+                    except:
+                        pass
+                postback_url = f"http://pb.imxbidding.net/pb/lsr?transaction_id={click_id}"
+
             init_msg = send_message(chat_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n\n⏳ Hitting Postback...")
             
             pb_status = "Failed"
@@ -185,6 +199,13 @@ def webhook():
             
         elif data_str == "select_task_condivio":
             selected_task = "Condivio"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://track.paddlewaver.com/`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_uni":
+            selected_task = "Uni"
             user_tasks[chat_id] = selected_task
             text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://track.paddlewaver.com/`"
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
