@@ -34,7 +34,9 @@ def get_tasks_keyboard():
             [{"text": "4. Condivio", "callback_data": "select_task_condivio"}],
             [{"text": "5. Uni", "callback_data": "select_task_uni"}],
             [{"text": "6. Amazon", "callback_data": "select_task_amazon"}],
-            [{"text": "7. Vivago", "callback_data": "select_task_vivago"}]
+            [{"text": "7. Vivago", "callback_data": "select_task_vivago"}],
+            [{"text": "8. Rapid Rupee", "callback_data": "select_task_rapid"}],
+            [{"text": "9. Novio", "callback_data": "select_task_novio"}]
         ]
     }
 
@@ -46,7 +48,6 @@ def process_vivago_events(chat_id, text):
         click_id = "Not Found"
         events = []
         
-        # URL parameters se mobvista_clickid ya standard clickid dhoondhna
         for key, values in query_params.items():
             val = values[0]
             if "mobvista_clickid" in val or "clickid" in key.lower():
@@ -72,7 +73,6 @@ def process_vivago_events(chat_id, text):
                     if "install" not in events:
                         events.append("install")
                         
-        # Fallback agar direct clickid param me ho
         if click_id == "Not Found":
             if "clickid=" in text:
                 try:
@@ -80,7 +80,6 @@ def process_vivago_events(chat_id, text):
                 except:
                     pass
 
-        # Default events agar koi specific event na mile
         if not events:
             events = ["install", "sign_up", "iap_purchase", "session"]
 
@@ -91,7 +90,7 @@ def process_vivago_events(chat_id, text):
         
         for index, ev in enumerate(events):
             if index > 0:
-                time.sleep(10) # 10 seconds delay between each event hit
+                time.sleep(10)
                 
             pb_url = f"http://stat.advcorp.net/event?clickid={click_id}&event_name={ev}"
             try:
@@ -226,6 +225,19 @@ def webhook():
                         pass
                 postback_url = f"http://postback.milengine.com/?adv=1000444&clickid={click_id}"
 
+            elif selected_task in ["Rapid Rupee", "Novio"]:
+                if "p1=" in text:
+                    try:
+                        click_id = text.split("p1=")[1].split("&")[0]
+                    except:
+                        pass
+                elif "clickid=" in text:
+                    try:
+                        click_id = text.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+                postback_url = f"http://postback.milengine.com/?adv=1000444&clickid={click_id}"
+
             init_msg = send_message(chat_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n\n⏳ Hitting Postback...")
             
             pb_status = "Failed"
@@ -326,6 +338,20 @@ def webhook():
             selected_task = "Vivago"
             user_tasks[chat_id] = selected_task
             text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.apdjust.com`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_rapid":
+            selected_task = "Rapid Rupee"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://t.clickscot.com`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_novio":
+            selected_task = "Novio"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://t.clickscot.com`"
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
             edit_message(chat_id, message_id, text, reply_markup=keyboard)
             
