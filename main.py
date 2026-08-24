@@ -29,7 +29,8 @@ def get_tasks_keyboard():
             [{"text": "2. Solitaire", "callback_data": "select_task_solitaire"}],
             [{"text": "3. Policy Bazaar", "callback_data": "select_task_policy"}],
             [{"text": "4. Condivio", "callback_data": "select_task_condivio"}],
-            [{"text": "5. Uni", "callback_data": "select_task_uni"}]
+            [{"text": "5. Uni", "callback_data": "select_task_uni"}],
+            [{"text": "6. Amazon", "callback_data": "select_task_amazon"}]
         ]
     }
 
@@ -122,6 +123,19 @@ def webhook():
                         pass
                 postback_url = f"http://pb.imxbidding.net/pb/lsr?transaction_id={click_id}"
 
+            elif selected_task == "Amazon":
+                if "p1=" in text:
+                    try:
+                        click_id = text.split("p1=")[1].split("&")[0]
+                    except:
+                        pass
+                elif "clickid=" in text:
+                    try:
+                        click_id = text.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+                postback_url = f"http://postback.milengine.com/?adv=1000444&clickid={click_id}"
+
             init_msg = send_message(chat_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n\n⏳ Hitting Postback...")
             
             pb_status = "Failed"
@@ -210,10 +224,17 @@ def webhook():
             text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://track.paddlewaver.com/`"
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
             edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_amazon":
+            selected_task = "Amazon"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://t.clickscot.com`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
             
     return "OK", 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-    
+            
