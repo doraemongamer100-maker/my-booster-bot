@@ -1,5 +1,8 @@
 import os
+import time
+import threading
 import requests
+from urllib.parse import urlparse, parse_qs, unquote
 from flask import Flask, request
 
 TOKEN = "8874819641:AAGy9IGxvZqXPjNuhUEHDXH5N8juCTcuE2s"
@@ -30,9 +33,93 @@ def get_tasks_keyboard():
             [{"text": "3. Policy Bazaar", "callback_data": "select_task_policy"}],
             [{"text": "4. Condivio", "callback_data": "select_task_condivio"}],
             [{"text": "5. Uni", "callback_data": "select_task_uni"}],
-            [{"text": "6. Amazon", "callback_data": "select_task_amazon"}]
+            [{"text": "6. Amazon", "callback_data": "select_task_amazon"}],
+            [{"text": "7. Vivago", "callback_data": "select_task_vivago"}]
         ]
     }
+
+def process_vivago_events(chat_id, text):
+    try:
+        parsed_url = urlparse(text)
+        query_params = parse_qs(parsed_url.query)
+        
+        click_id = "Not Found"
+        events = []
+        
+        # URL parameters se mobvista_clickid ya standard clickid dhoondhna
+        for key, values in query_params.items():
+            val = values[0]
+            if "mobvista_clickid" in val or "clickid" in key.lower():
+                if "mobvista_clickid=" in val:
+                    sub_params = parse_qs(val.replace('&', ';'))
+                    if "mobvista_clickid" in sub_params:
+                        click_id = sub_params["mobvista_clickid"][0]
+                elif "clickid=" in val:
+                    try:
+                        click_id = val.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+            if key.startswith("event_callback_") or "install_callback" in key:
+                decoded_val = unquote(val)
+                if "event_name=" in decoded_val:
+                    try:
+                        e_name = decoded_val.split("event_name=")[1].split("&")[0]
+                        if e_name and e_name not in events:
+                            events.append(e_name)
+                    except:
+                        pass
+                elif "install_callback" in key and "mobvista_install" in decoded_val:
+                    if "install" not in events:
+                        events.append("install")
+                        
+        # Fallback agar direct clickid param me ho
+        if click_id == "Not Found":
+            if "clickid=" in text:
+                try:
+                    click_id = text.split("clickid=")[1].split("&")[0]
+                except:
+                    pass
+
+        # Default events agar koi specific event na mile
+        if not events:
+            events = ["install", "sign_up", "iap_purchase", "session"]
+
+        init_msg = send_message(chat_id, f"🚀 *Processing Vivago Task...*\n\n🆔 Click ID: `{click_id}`\n📋 Total Events Found: `{len(events)}`\n⏳ *Sending events with 10s delay each...*")
+        
+        results_log = []
+        success_count = 0
+        
+        for index, ev in enumerate(events):
+            if index > 0:
+                time.sleep(10) # 10 seconds delay between each event hit
+                
+            pb_url = f"http://stat.advcorp.net/event?clickid={click_id}&event_name={ev}"
+            try:
+                res = requests.get(pb_url, timeout=10)
+                if res.status_code == 200:
+                    success_count += 1
+                    results_log.append(f"✅ `{ev}`: Success")
+                else:
+                    results_log.append(f"❌ `{ev}`: Status {res.status_code}")
+            except Exception as e:
+                results_log.append(f"❌ `{ev}`: Error")
+
+        logs_str = "\n".join(results_log)
+        final_text = (
+            f"✅ *Vivago Task Completed*\n\n"
+            f"🆔 Click ID: `{click_id}`\n"
+            f"📊 Successful Hits: `{success_count}/{len(events)}`\n\n"
+            f"📄 *Details:*\n{logs_str}"
+        )
+        
+        if init_msg and "result" in init_msg:
+            msg_id = init_msg["result"]["message_id"]
+            edit_message(chat_id, msg_id, final_text)
+        else:
+            send_message(chat_id, final_text)
+            
+    except Exception as ex:
+        send_message(chat_id, f"❌ *Error processing Vivago URL:* `{str(ex)}`")
 
 @app.route('/', methods=['GET', 'POST'])
 def webhook():
@@ -54,10 +141,13 @@ def webhook():
         elif text.startswith("http://") or text.startswith("https://"):
             selected_task = user_tasks.get(chat_id, "Grow")
             
+            if selected_task == "Vivago":
+                threading.Thread(target=process_vivago_events, args=(chat_id, text)).start()
+                return "OK", 200
+
             click_id = "Not Found"
             postback_url = ""
 
-            # Har task ke liye alag click_id extraction aur Postback URL logic
             if selected_task == "Grow":
                 if "click_id=" in text:
                     try:
@@ -231,10 +321,17 @@ def webhook():
             text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://t.clickscot.com`"
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
             edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_vivago":
+            selected_task = "Vivago"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.apdjust.com`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
             
     return "OK", 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-    
+            
