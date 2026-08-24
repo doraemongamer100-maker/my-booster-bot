@@ -26,7 +26,9 @@ def get_tasks_keyboard():
     return {
         "inline_keyboard": [
             [{"text": "1. Grow", "callback_data": "select_task_grow"}],
-            [{"text": "2. Solitaire", "callback_data": "select_task_solitaire"}]
+            [{"text": "2. Solitaire", "callback_data": "select_task_solitaire"}],
+            [{"text": "3. Policy Bazaar", "callback_data": "select_task_policy"}],
+            [{"text": "4. Condivio", "callback_data": "select_task_condivio"}]
         ]
     }
 
@@ -53,7 +55,7 @@ def webhook():
             click_id = "Not Found"
             postback_url = ""
 
-            # Task ke hisaab se Click ID extraction aur Postback URL set karna
+            # Har task ke liye alag click_id extraction aur Postback URL logic
             if selected_task == "Grow":
                 if "click_id=" in text:
                     try:
@@ -79,6 +81,32 @@ def webhook():
                     except:
                         pass
                 postback_url = f"http://postback.milengine.com/?adv=1000444&clickid={click_id}"
+
+            elif selected_task == "Policy Bazaar":
+                if "p1=" in text:
+                    try:
+                        click_id = text.split("p1=")[1].split("&")[0]
+                    except:
+                        pass
+                elif "clickid=" in text:
+                    try:
+                        click_id = text.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+                postback_url = f"http://postback.milengine.com/?adv=1000444&clickid={click_id}"
+
+            elif selected_task == "Condivio":
+                if "clickid=" in text:
+                    try:
+                        click_id = text.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+                elif "click_id=" in text:
+                    try:
+                        click_id = text.split("click_id=")[1].split("&")[0]
+                    except:
+                        pass
+                postback_url = f"http://pb.shangmaikj.com/pb/lsr?transaction_id={click_id}"
 
             init_msg = send_message(chat_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n\n⏳ Hitting Postback...")
             
@@ -144,7 +172,21 @@ def webhook():
         elif data_str == "select_task_solitaire":
             selected_task = "Solitaire"
             user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.adjust.com/...`"
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.adjust.com/`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
+            
+        elif data_str == "select_task_policy":
+            selected_task = "Policy Bazaar"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://t.clickscot.com/`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
+            
+        elif data_str == "select_task_condivio":
+            selected_task = "Condivio"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://track.paddlewaver.com/`"
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
             edit_message(chat_id, message_id, text, reply_markup=keyboard)
             
