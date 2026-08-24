@@ -83,14 +83,20 @@ def process_vivago_events(chat_id, text):
         if not events:
             events = ["install", "sign_up", "iap_purchase", "session"]
 
-        init_msg = send_message(chat_id, f"🚀 *Processing Vivago Task...*\n\n🆔 Click ID: `{click_id}`\n📋 Total Events Found: `{len(events)}`\n⏳ *Sending events with 10s delay each...*")
+        init_msg = send_message(chat_id, f"🚀 *Processing Vivago Task...*\n\n🆔 Click ID: `{click_id}`\n📋 Total Events Found: `{len(events)}`\n⏳ *Sending events with 15s delay each...*")
         
         results_log = []
         success_count = 0
         
         for index, ev in enumerate(events):
             if index > 0:
-                time.sleep(10)
+                if init_msg and "result" in init_msg:
+                    msg_id = init_msg["result"]["message_id"]
+                    for remaining in range(15, 0, -1):
+                        edit_message(chat_id, msg_id, f"🚀 *Processing Vivago Task...*\n\n🆔 Click ID: `{click_id}`\n⏳ *Waiting {remaining}s before next event ({ev})...*")
+                        time.sleep(1)
+                else:
+                    time.sleep(15)
                 
             pb_url = f"http://stat.advcorp.net/event?clickid={click_id}&event_name={ev}"
             try:
@@ -238,8 +244,17 @@ def webhook():
                         pass
                 postback_url = f"http://postback.milengine.com/?adv=1000444&clickid={click_id}"
 
-            init_msg = send_message(chat_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n\n⏳ Hitting Postback...")
+            init_msg = send_message(chat_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n⏳ *Waiting 15 seconds before hitting postback...*")
             
+            # 15 seconds live countdown on bot
+            if init_msg and "result" in init_msg:
+                msg_id = init_msg["result"]["message_id"]
+                for remaining in range(15, 0, -1):
+                    edit_message(chat_id, msg_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n⏳ *Waiting {remaining} seconds...*")
+                    time.sleep(1)
+            else:
+                time.sleep(15)
+
             pb_status = "Failed"
             pb_response_text = ""
             task_success = False
