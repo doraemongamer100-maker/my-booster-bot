@@ -36,7 +36,11 @@ def get_tasks_keyboard():
             [{"text": "6. Amazon", "callback_data": "select_task_amazon"}],
             [{"text": "7. Vivago", "callback_data": "select_task_vivago"}],
             [{"text": "8. Rapid Rupee", "callback_data": "select_task_rapid"}],
-            [{"text": "9. Novio", "callback_data": "select_task_novio"}]
+            [{"text": "9. Novio", "callback_data": "select_task_novio"}],
+            [{"text": "10. Aspro Bonds", "callback_data": "select_task_aspro"}],
+            [{"text": "11. Truemads", "callback_data": "select_task_truemads"}],
+            [{"text": "12. Incred", "callback_data": "select_task_incred"}],
+            [{"text": "13. Candy Crush", "callback_data": "select_task_candy"}]
         ]
     }
 
@@ -171,33 +175,25 @@ def webhook():
                         pass
                 postback_url = f"http://pb.iskyworker.com/pb/lsr?transaction_id={click_id}"
 
-            elif selected_task == "Solitaire":
-                if "label=" in text:
+            elif selected_task in ["Solitaire", "Policy Bazaar", "Amazon", "Rapid Rupee", "Novio", "Candy Crush"]:
+                if "clickid=" in text:
+                    try:
+                        click_id = text.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+                elif "label=" in text:
                     try:
                         click_id = text.split("label=")[1].split("&")[0]
                     except:
                         pass
-                elif "clickid=" in text:
-                    try:
-                        click_id = text.split("clickid=")[1].split("&")[0]
-                    except:
-                        pass
-                postback_url = f"http://postback.milengine.com/?adv=1000444&clickid={click_id}"
-
-            elif selected_task == "Policy Bazaar":
-                if "p1=" in text:
+                elif "p1=" in text:
                     try:
                         click_id = text.split("p1=")[1].split("&")[0]
                     except:
                         pass
-                elif "clickid=" in text:
-                    try:
-                        click_id = text.split("clickid=")[1].split("&")[0]
-                    except:
-                        pass
                 postback_url = f"http://postback.milengine.com/?adv=1000444&clickid={click_id}"
 
-            elif selected_task == "Condivio":
+            elif selected_task in ["Condivio", "Uni", "Aspro Bonds", "Truemads", "Incred"]:
                 if "clickid=" in text:
                     try:
                         click_id = text.split("clickid=")[1].split("&")[0]
@@ -208,46 +204,12 @@ def webhook():
                         click_id = text.split("click_id=")[1].split("&")[0]
                     except:
                         pass
-                postback_url = f"http://pb.imxbidding.net/pb/lsr?transaction_id={click_id}"
-
-            elif selected_task == "Uni":
-                if "clickid=" in text:
-                    try:
-                        click_id = text.split("clickid=")[1].split("&")[0]
-                    except:
-                        pass
-                elif "click_id=" in text:
-                    try:
-                        click_id = text.split("click_id=")[1].split("&")[0]
-                    except:
-                        pass
-                postback_url = f"http://pb.imxbidding.net/pb/lsr?transaction_id={click_id}"
-
-            elif selected_task == "Amazon":
-                if "p1=" in text:
+                elif "p1=" in text:
                     try:
                         click_id = text.split("p1=")[1].split("&")[0]
                     except:
                         pass
-                elif "clickid=" in text:
-                    try:
-                        click_id = text.split("clickid=")[1].split("&")[0]
-                    except:
-                        pass
-                postback_url = f"http://postback.milengine.com/?adv=1000444&clickid={click_id}"
-
-            elif selected_task in ["Rapid Rupee", "Novio"]:
-                if "p1=" in text:
-                    try:
-                        click_id = text.split("p1=")[1].split("&")[0]
-                    except:
-                        pass
-                elif "clickid=" in text:
-                    try:
-                        click_id = text.split("clickid=")[1].split("&")[0]
-                    except:
-                        pass
-                postback_url = f"http://postback.milengine.com/?adv=1000444&clickid={click_id}"
+                postback_url = f"http://pb.imxbidding.net/pb/lsr?transaction_id={click_id}"
 
             init_msg = send_message(chat_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n⏳ *Waiting 5 seconds before hitting postback...*")
             
@@ -374,10 +336,38 @@ def webhook():
             text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://t.clickscot.com`"
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
             edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_aspro":
+            selected_task = "Aspro Bonds"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://track.paddlewaver.com`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_truemads":
+            selected_task = "Truemads"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://track.paddlewaver.com`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_incred":
+            selected_task = "Incred"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://track.paddlewaver.com`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_candy":
+            selected_task = "Candy Crush"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.appsflyer.com`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
             
     return "OK", 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-    
+                    
