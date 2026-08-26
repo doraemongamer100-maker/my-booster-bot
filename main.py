@@ -5,11 +5,11 @@ import requests
 from urllib.parse import urlparse, parse_qs, unquote
 from flask import Flask, request
 
-TOKEN = "8874819641:AAGy9IGxvZqXPjNuhUEHDXH5N8juCTcuE2s"
+TOKEN = "8874819641:AAG_da4XGX2CoTsLiQgyV3QKCcC_OOYxJIs"
 URL = f"https://api.telegram.org/bot{TOKEN}/"
 
 # Force Channel Join Settings
-CHANNEL_USERNAME = "@Dragon_Scripterr"  # ya channel link/ID
+CHANNEL_USERNAME = "@Dragon_Scripterr"
 CHANNEL_URL = "https://t.me/Dragon_Scripterr"
 
 app = Flask(__name__)
@@ -142,7 +142,7 @@ def process_vivago_events(chat_id, text):
                     success_count += 1
                     results_log.append(f"✅ `{ev}`: Success")
                 else:
-                    results_log.append(f"❌ `{ev}`: Status {res.status_code}")
+                    results_log.append(f"❌ `{ev}`: Failed")
             except Exception as e:
                 results_log.append(f"❌ `{ev}`: Error")
 
@@ -178,7 +178,6 @@ def webhook():
         chat_id = data["message"]["chat"]["id"]
         text = data["message"].get("text", "")
         
-        # Check channel subscription first
         if not check_user_subscription(chat_id):
             send_message(chat_id, "⚠️ *Access Denied!*\n\nYou must join our channel first to use this bot.", reply_markup=get_join_keyboard())
             return "OK", 200
@@ -262,12 +261,19 @@ def webhook():
             
             try:
                 pb_res = requests.get(postback_url, timeout=10)
-                pb_response_text = pb_res.text.strip()
+                raw_response = pb_res.text.strip()
                 pb_status = f"Status {pb_res.status_code}"
+                
+                # Security: Hide Postback URL from user response
+                if "http://" in raw_response or "https://" in raw_response:
+                    pb_response_text = "Success (URL hidden)"
+                else:
+                    pb_response_text = raw_response
+
                 if pb_res.status_code == 200:
                     task_success = True
             except Exception as e:
-                pb_response_text = str(e)
+                pb_response_text = "Connection Error"
                 pb_status = "Connection Error"
 
             if task_success:
@@ -415,9 +421,4 @@ def webhook():
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
             edit_message(chat_id, message_id, text, reply_markup=keyboard)
             
-    return "OK", 200
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
-        
+    r
