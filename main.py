@@ -8,8 +8,11 @@ from flask import Flask, request
 TOKEN = "8874819641:AAGy9IGxvZqXPjNuhUEHDXH5N8juCTcuE2s"
 URL = f"https://api.telegram.org/bot{TOKEN}/"
 
-app = Flask(__name__)
+# Force Channel Join Settings
+CHANNEL_USERNAME = "@Dragon_Scripterr"  # ya channel link/ID
+CHANNEL_URL = "https://t.me/Dragon_Scripterr"
 
+app = Flask(__name__)
 user_tasks = {}
 
 def send_message(chat_id, text, reply_markup=None):
@@ -24,6 +27,26 @@ def edit_message(chat_id, message_id, text, reply_markup=None):
     if reply_markup:
         payload["reply_markup"] = reply_markup
     requests.post(URL + "editMessageText", json=payload)
+
+def check_user_subscription(chat_id):
+    try:
+        res = requests.get(f"{URL}getChatMember", params={"chat_id": CHANNEL_USERNAME, "user_id": chat_id})
+        data = res.json()
+        if data.get("ok"):
+            status = data["result"].get("status")
+            if status in ["member", "administrator", "creator"]:
+                return True
+    except Exception:
+        pass
+    return False
+
+def get_join_keyboard():
+    return {
+        "inline_keyboard": [
+            [{"text": "📢 Join Channel", "url": CHANNEL_URL}],
+            [{"text": "🔄 Check Membership", "callback_data": "check_subscription"}]
+        ]
+    }
 
 def get_tasks_keyboard():
     return {
@@ -64,18 +87,6 @@ def process_vivago_events(chat_id, text):
                         click_id = val.split("clickid=")[1].split("&")[0]
                     except:
                         pass
-            if key.startswith("event_callback_") or "install_callback" in key:
-                decoded_val = unquote(val)
-                if "event_name=" in decoded_val:
-                    try:
-                        e_name = decoded_val.split("event_name=")[1].split("&")[0]
-                        if e_name and e_name not in events:
-                            events.append(e_name)
-                    except:
-                        pass
-                elif "install_callback" in key and "mobvista_install" in decoded_val:
-                    if "install" not in events:
-                        events.append("install")
                         
         if click_id == "Not Found":
             if "mobvista_clickid=" in text:
@@ -88,6 +99,23 @@ def process_vivago_events(chat_id, text):
                     click_id = text.split("clickid=")[1].split("&")[0]
                 except:
                     pass
+
+        for key, values in query_params.items():
+            if key.startswith("event_callback_") or "install_callback" in key:
+                decoded_val = unquote(values[0])
+                while "%" in decoded_val:
+                    decoded_val = unquote(decoded_val)
+                    
+                if "event_name=" in decoded_val:
+                    try:
+                        e_name = decoded_val.split("event_name=")[1].split("&")[0]
+                        if e_name and e_name not in events:
+                            events.append(e_name)
+                    except:
+                        pass
+                elif "install_callback" in key or "mobvista_install" in decoded_val:
+                    if "install" not in events:
+                        events.append("install")
 
         if not events:
             events = ["install", "sign_up", "iap_purchase", "session"]
@@ -119,8 +147,10 @@ def process_vivago_events(chat_id, text):
                 results_log.append(f"❌ `{ev}`: Error")
 
         logs_str = "\n".join(results_log)
+        status_heading = "✅ *Task Bypass Successful*" if success_count > 0 else "❌ *Failed*"
         final_text = (
-            f"✅ *Vivago Task Completed*\n\n"
+            f"{status_heading}\n\n"
+            f"🎯 Task: *Vivago*\n"
             f"🆔 Click ID: `{click_id}`\n"
             f"📊 Successful Hits: `{success_count}/{len(events)}`\n\n"
             f"📄 *Details:*\n{logs_str}"
@@ -147,6 +177,11 @@ def webhook():
     if "message" in data:
         chat_id = data["message"]["chat"]["id"]
         text = data["message"].get("text", "")
+        
+        # Check channel subscription first
+        if not check_user_subscription(chat_id):
+            send_message(chat_id, "⚠️ *Access Denied!*\n\nYou must join our channel first to use this bot.", reply_markup=get_join_keyboard())
+            return "OK", 200
         
         if text == "/start":
             welcome_text = "🚀 *Welcome*\n\n1️⃣ Select Task\n2️⃣ Send Tracking URL\n3️⃣ Wait for confirmation\n\n👉 *Choose task below*"
@@ -213,7 +248,6 @@ def webhook():
 
             init_msg = send_message(chat_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n⏳ *Waiting 5 seconds before hitting postback...*")
             
-            # 5 seconds live countdown on bot
             if init_msg and "result" in init_msg:
                 msg_id = init_msg["result"]["message_id"]
                 for remaining in range(5, 0, -1):
@@ -238,7 +272,7 @@ def webhook():
 
             if task_success:
                 final_text = (
-                    f"✅ *Successfully Your Task Completed*\n\n"
+                    f"✅ *Task Bypass Successful*\n\n"
                     f"🎯 Task: *{selected_task}*\n"
                     f"🆔 Click ID: `{click_id}`\n"
                     f"🟢 Postback Status: *{pb_status}*\n"
@@ -246,7 +280,7 @@ def webhook():
                 )
             else:
                 final_text = (
-                    f"❌ *Task Failed (Postback Error)*\n\n"
+                    f"❌ *Failed*\n\n"
                     f"🎯 Task: *{selected_task}*\n"
                     f"🆔 Click ID: `{click_id}`\n"
                     f"🔴 Postback Status: *{pb_status}*\n"
@@ -270,6 +304,22 @@ def webhook():
         
         requests.post(URL + "answerCallbackQuery", json={"callback_query_id": query_id})
         
+        if data_str == "check_subscription":
+            if check_user_subscription(chat_id):
+                welcome_text = "🚀 *Welcome*\n\n1️⃣ Select Task\n2️⃣ Send Tracking URL\n3️⃣ Wait for confirmation\n\n👉 *Choose task below*"
+                edit_message(chat_id, message_id, welcome_text, reply_markup=get_tasks_keyboard())
+            else:
+                requests.post(URL + "answerCallbackQuery", json={
+                    "callback_query_id": query_id,
+                    "text": "❌ You haven't joined the channel yet!",
+                    "show_alert": True
+                })
+            return "OK", 200
+
+        if not check_user_subscription(chat_id):
+            edit_message(chat_id, message_id, "⚠️ *Access Denied!*\n\nYou must join our channel first to use this bot.", reply_markup=get_join_keyboard())
+            return "OK", 200
+
         if data_str == "start_menu":
             welcome_text = "🚀 *Select Task*\n\n👉 *Choose task below*"
             edit_message(chat_id, message_id, welcome_text, reply_markup=get_tasks_keyboard())
@@ -370,4 +420,4 @@ def webhook():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-                    
+        
