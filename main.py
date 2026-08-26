@@ -5,7 +5,7 @@ import requests
 from urllib.parse import urlparse, parse_qs, unquote
 from flask import Flask, request
 
-TOKEN = "8874819641:AAG_da4XGX2CoTsLiQgyV3QKCcC_OOYxJIs"
+TOKEN = "8874819641:AAFEFdew30UrcZfsvfZHtBsHA4duKnRnQA4"
 URL = f"https://api.telegram.org/bot{TOKEN}/"
 
 # Force Channel Join Settings
