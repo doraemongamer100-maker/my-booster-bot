@@ -1,5 +1,4 @@
 import os
-import time
 import threading
 import requests
 from urllib.parse import urlparse, parse_qs, unquote
@@ -120,21 +119,12 @@ def process_vivago_events(chat_id, text):
         if not events:
             events = ["install", "sign_up", "iap_purchase", "session"]
 
-        init_msg = send_message(chat_id, f"🚀 *Processing Vivago Task...*\n\n🆔 Click ID: `{click_id}`\n📋 Total Events Found: `{len(events)}`\n⏳ *Sending events with 5s delay each...*")
+        init_msg = send_message(chat_id, f"🚀 *Processing Vivago Task...*\n\n🆔 Click ID: `{click_id}`\n📋 Total Events Found: `{len(events)}`\n⏳ *Sending events instantly...*")
         
         results_log = []
         success_count = 0
         
         for index, ev in enumerate(events):
-            if index > 0:
-                if init_msg and "result" in init_msg:
-                    msg_id = init_msg["result"]["message_id"]
-                    for remaining in range(5, 0, -1):
-                        edit_message(chat_id, msg_id, f"🚀 *Processing Vivago Task...*\n\n🆔 Click ID: `{click_id}`\n⏳ *Waiting {remaining}s before next event ({ev})...*")
-                        time.sleep(1)
-                else:
-                    time.sleep(5)
-                
             pb_url = f"http://stat.advcorp.net/event?clickid={click_id}&event_name={ev}"
             try:
                 res = requests.get(pb_url, timeout=10)
@@ -245,16 +235,6 @@ def webhook():
                         pass
                 postback_url = f"http://pb.imxbidding.net/pb/lsr?transaction_id={click_id}"
 
-            init_msg = send_message(chat_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n⏳ *Waiting 5 seconds before hitting postback...*")
-            
-            if init_msg and "result" in init_msg:
-                msg_id = init_msg["result"]["message_id"]
-                for remaining in range(5, 0, -1):
-                    edit_message(chat_id, msg_id, f"🚀 *Processing Task...*\n\n🎯 Task: *{selected_task}*\n🆔 Click ID: `{click_id}`\n⏳ *Waiting {remaining} seconds...*")
-                    time.sleep(1)
-            else:
-                time.sleep(5)
-
             pb_status = "Failed"
             pb_response_text = ""
             task_success = False
@@ -293,11 +273,7 @@ def webhook():
                     f"📄 *Error Details:* `{pb_response_text}`"
                 )
             
-            if init_msg and "result" in init_msg:
-                msg_id = init_msg["result"]["message_id"]
-                edit_message(chat_id, msg_id, final_text)
-            else:
-                send_message(chat_id, final_text)
+            send_message(chat_id, final_text)
         else:
             send_message(chat_id, "❌ *Invalid URL*\n\nPlease send a valid tracking URL.")
             
@@ -426,3 +402,4 @@ def webhook():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+            
