@@ -53,16 +53,17 @@ def get_tasks_keyboard():
             [{"text": "1. Grow", "callback_data": "select_task_grow"}],
             [{"text": "2. Solitaire", "callback_data": "select_task_solitaire"}],
             [{"text": "3. Policy Bazaar", "callback_data": "select_task_policy"}],
-            [{"text": "4. Condivio", "callback_data": "select_task_condivio"}],
-            [{"text": "5. Uni", "callback_data": "select_task_uni"}],
-            [{"text": "6. Amazon", "callback_data": "select_task_amazon"}],
-            [{"text": "7. Vivago", "callback_data": "select_task_vivago"}],
-            [{"text": "8. Rapid Rupee", "callback_data": "select_task_rapid"}],
-            [{"text": "9. Novio", "callback_data": "select_task_novio"}],
-            [{"text": "10. Aspro Bonds", "callback_data": "select_task_aspro"}],
-            [{"text": "11. Truemads", "callback_data": "select_task_truemads"}],
-            [{"text": "12. Incred", "callback_data": "select_task_incred"}],
-            [{"text": "13. Candy Crush", "callback_data": "select_task_candy"}]
+            [{"text": "4. Policy Bazaar 2", "callback_data": "select_task_policy2"}],
+            [{"text": "5. Condivio", "callback_data": "select_task_condivio"}],
+            [{"text": "6. Uni", "callback_data": "select_task_uni"}],
+            [{"text": "7. Amazon", "callback_data": "select_task_amazon"}],
+            [{"text": "8. Vivago", "callback_data": "select_task_vivago"}],
+            [{"text": "9. Rapid Rupee", "callback_data": "select_task_rapid"}],
+            [{"text": "10. Novio", "callback_data": "select_task_novio"}],
+            [{"text": "11. Aspro Bonds", "callback_data": "select_task_aspro"}],
+            [{"text": "12. Truemads", "callback_data": "select_task_truemads"}],
+            [{"text": "13. Incred", "callback_data": "select_task_incred"}],
+            [{"text": "14. Candy Crush", "callback_data": "select_task_candy"}]
         ]
     }
 
@@ -199,6 +200,19 @@ def webhook():
                         pass
                 postback_url = f"http://pb.iskyworker.com/pb/lsr?transaction_id={click_id}"
 
+            elif selected_task == "Policy Bazaar 2":
+                if "aff_sub=" in text:
+                    try:
+                        click_id = text.split("aff_sub=")[1].split("&")[0]
+                    except:
+                        pass
+                elif "clickid=" in text:
+                    try:
+                        click_id = text.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+                postback_url = f"http://pb.iskyworker.com/pb/lsr?transaction_id={click_id}"
+
             elif selected_task in ["Solitaire", "Policy Bazaar", "Amazon", "Rapid Rupee", "Novio", "Candy Crush"]:
                 if "clickid=" in text:
                     try:
@@ -326,6 +340,13 @@ def webhook():
             text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://t.clickscot.com/`"
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
             edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_policy2":
+            selected_task = "Policy Bazaar 2"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `http://kswj.unionapps.info/`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
             
         elif data_str == "select_task_condivio":
             selected_task = "Condivio"
@@ -402,4 +423,4 @@ def webhook():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-            
+        
