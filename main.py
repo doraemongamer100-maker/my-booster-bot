@@ -66,7 +66,9 @@ def get_tasks_keyboard():
             [{"text": "13. Incred", "callback_data": "select_task_incred"}],
             [{"text": "14. Candy Crush", "callback_data": "select_task_candy"}],
             [{"text": "15. Jar", "callback_data": "select_task_jar"}],
-            [{"text": "16. Rapid Rupee (New)", "callback_data": "select_task_rapid_new"}]
+            [{"text": "16. Rapid Rupee (New)", "callback_data": "select_task_rapid_new"}],
+            [{"text": "17. Xm360", "callback_data": "select_task_xm360"}],
+            [{"text": "18. Bharat Pe", "callback_data": "select_task_bharatpe"}]
         ]
     }
 
@@ -244,10 +246,36 @@ def webhook():
                         pass
                 postback_url = f"http://fpb.bigflymobi.com/v1/api/event?event_name=install&adv_click_id={click_id}"
                 
-                # Random IP Generator specifically for Rapid Rupee (New)
+                # Random IP Generator for Rapid Rupee (New)
                 random_ip = f"{random.randint(103, 199)}.{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}"
                 headers['X-Forwarded-For'] = random_ip
                 headers['X-Real-IP'] = random_ip
+
+            elif selected_task == "Xm360":
+                if "clickid=" in text:
+                    try:
+                        click_id = text.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+                elif "click_id=" in text:
+                    try:
+                        click_id = text.split("click_id=")[1].split("&")[0]
+                    except:
+                        pass
+                postback_url = f"https://post.clickscot.com/acquisition?security_token=36399a458c8980278778&click_id={click_id}"
+
+            elif selected_task == "Bharat Pe":
+                if "clickid=" in text:
+                    try:
+                        click_id = text.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+                elif "click_id=" in text:
+                    try:
+                        click_id = text.split("click_id=")[1].split("&")[0]
+                    except:
+                        pass
+                postback_url = f"https://offers-mobtions.affise.com/postback?goal=first_txn_success&clickid={click_id}"
 
             elif selected_task in ["Solitaire", "Policy Bazaar", "Amazon", "Rapid Rupee", "Novio", "Candy Crush"]:
                 if "clickid=" in text:
@@ -395,6 +423,20 @@ def webhook():
             selected_task = "Rapid Rupee (New)"
             user_tasks[chat_id] = selected_task
             text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://appsflyer.com`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_xm360":
+            selected_task = "Xm360"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.appsflyer.com`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_bharatpe":
+            selected_task = "Bharat Pe"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.appsflyer.com`"
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
             edit_message(chat_id, message_id, text, reply_markup=keyboard)
             
