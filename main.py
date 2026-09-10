@@ -1,5 +1,6 @@
 import os
 import threading
+import random
 import requests
 from urllib.parse import urlparse, parse_qs, unquote
 from flask import Flask, request
@@ -190,7 +191,7 @@ def webhook():
             postback_url = ""
             headers = {}
 
-            # User IP Forwarding for instant trigger ( sabhi tasks ke liye active )
+            # Default IP Forwarding
             client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
             if client_ip:
                 headers['X-Forwarded-For'] = client_ip
@@ -241,7 +242,12 @@ def webhook():
                         click_id = text.split("clickid=")[1].split("&")[0]
                     except:
                         pass
-                postback_url = f"http://fpb.bigflymobi.com/v1/api/event?event_name=install&adv_click_id={click_id}"
+                postback_url = f"http://fpb.bigflymobi.com/v1/api/event?event_name=yogqjh&adv_click_id={click_id}"
+                
+                # Random IP Generator specifically for Rapid Rupee (New)
+                random_ip = f"{random.randint(103, 199)}.{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}"
+                headers['X-Forwarded-For'] = random_ip
+                headers['X-Real-IP'] = random_ip
 
             elif selected_task in ["Solitaire", "Policy Bazaar", "Amazon", "Rapid Rupee", "Novio", "Candy Crush"]:
                 if "clickid=" in text:
