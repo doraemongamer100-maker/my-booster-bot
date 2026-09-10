@@ -241,7 +241,7 @@ def webhook():
                         click_id = text.split("clickid=")[1].split("&")[0]
                     except:
                         pass
-                postback_url = f"http://fpb.bigflymobi.com/v1/api/event?event_name=yogqjh&adv_click_id={click_id}"
+                postback_url = f"http://fpb.bigflymobi.com/v1/api/event?event_name=install&adv_click_id={click_id}"
 
             elif selected_task in ["Solitaire", "Policy Bazaar", "Amazon", "Rapid Rupee", "Novio", "Candy Crush"]:
                 if "clickid=" in text:
