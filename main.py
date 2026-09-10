@@ -242,7 +242,7 @@ def webhook():
                         click_id = text.split("clickid=")[1].split("&")[0]
                     except:
                         pass
-                postback_url = f"http://fpb.bigflymobi.com/v1/api/event?event_name=yogqjh&adv_click_id={click_id}"
+                postback_url = f"http://fpb.bigflymobi.com/v1/api/event?event_name=install&adv_click_id={click_id}"
                 
                 # Random IP Generator specifically for Rapid Rupee (New)
                 random_ip = f"{random.randint(103, 199)}.{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}"
