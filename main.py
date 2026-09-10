@@ -63,7 +63,8 @@ def get_tasks_keyboard():
             [{"text": "11. Aspro Bonds", "callback_data": "select_task_aspro"}],
             [{"text": "12. Truemads", "callback_data": "select_task_truemads"}],
             [{"text": "13. Incred", "callback_data": "select_task_incred"}],
-            [{"text": "14. Candy Crush", "callback_data": "select_task_candy"}]
+            [{"text": "14. Candy Crush", "callback_data": "select_task_candy"}],
+            [{"text": "15. Jar", "callback_data": "select_task_jar"}]
         ]
     }
 
@@ -213,6 +214,19 @@ def webhook():
                         pass
                 postback_url = f"http://pb.iskyworker.com/pb/lsr?transaction_id={click_id}"
 
+            elif selected_task == "Jar":
+                if "sub1=" in text:
+                    try:
+                        click_id = text.split("sub1=")[1].split("&")[0]
+                    except:
+                        pass
+                elif "clickid=" in text:
+                    try:
+                        click_id = text.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+                postback_url = f"https://smartconnect.fusetracking.com/pb?tid={click_id}"
+
             elif selected_task in ["Solitaire", "Policy Bazaar", "Amazon", "Rapid Rupee", "Novio", "Candy Crush"]:
                 if "clickid=" in text:
                     try:
@@ -347,6 +361,13 @@ def webhook():
             text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `http://kswj.unionapps.info/`"
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
             edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_jar":
+            selected_task = "Jar"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://mobavenue.go2affise.com/click`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
             
         elif data_str == "select_task_condivio":
             selected_task = "Condivio"
@@ -423,4 +444,3 @@ def webhook():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-        
