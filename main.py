@@ -64,7 +64,8 @@ def get_tasks_keyboard():
             [{"text": "12. Truemads", "callback_data": "select_task_truemads"}],
             [{"text": "13. Incred", "callback_data": "select_task_incred"}],
             [{"text": "14. Candy Crush", "callback_data": "select_task_candy"}],
-            [{"text": "15. Jar", "callback_data": "select_task_jar"}]
+            [{"text": "15. Jar", "callback_data": "select_task_jar"}],
+            [{"text": "16. Rapid Rupee (New)", "callback_data": "select_task_rapid_new"}]
         ]
     }
 
@@ -187,6 +188,13 @@ def webhook():
 
             click_id = "Not Found"
             postback_url = ""
+            headers = {}
+
+            # User IP Forwarding for instant trigger ( sabhi tasks ke liye active )
+            client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+            if client_ip:
+                headers['X-Forwarded-For'] = client_ip
+                headers['X-Real-IP'] = client_ip
 
             if selected_task == "Grow":
                 if "click_id=" in text:
@@ -226,6 +234,14 @@ def webhook():
                     except:
                         pass
                 postback_url = f"https://smartconnect.fusetracking.com/pb?tid={click_id}"
+
+            elif selected_task == "Rapid Rupee (New)":
+                if "clickid=" in text:
+                    try:
+                        click_id = text.split("clickid=")[1].split("&")[0]
+                    except:
+                        pass
+                postback_url = f"http://fpb.bigflymobi.com/v1/api/event?event_name=yogqjh&adv_click_id={click_id}"
 
             elif selected_task in ["Solitaire", "Policy Bazaar", "Amazon", "Rapid Rupee", "Novio", "Candy Crush"]:
                 if "clickid=" in text:
@@ -268,7 +284,7 @@ def webhook():
             task_success = False
             
             try:
-                pb_res = requests.get(postback_url, timeout=10)
+                pb_res = requests.get(postback_url, headers=headers, timeout=10)
                 raw_response = pb_res.text.strip()
                 pb_status = f"Status {pb_res.status_code}"
                 
@@ -368,6 +384,13 @@ def webhook():
             text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://mobavenue.go2affise.com/click`"
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
             edit_message(chat_id, message_id, text, reply_markup=keyboard)
+
+        elif data_str == "select_task_rapid_new":
+            selected_task = "Rapid Rupee (New)"
+            user_tasks[chat_id] = selected_task
+            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://appsflyer.com`"
+            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
+            edit_message(chat_id, message_id, text, reply_markup=keyboard)
             
         elif data_str == "select_task_condivio":
             selected_task = "Condivio"
@@ -442,5 +465,5 @@ def webhook():
     return "OK", 200
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
