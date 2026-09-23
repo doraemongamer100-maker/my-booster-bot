@@ -244,7 +244,7 @@ def webhook():
                         click_id = text.split("clickid=")[1].split("&")[0]
                     except:
                         pass
-                postback_url = f"http://fpb.bigflymobi.com/v1/api/event?event_name=install&adv_click_id={click_id}"
+                postback_url = f"http://fpb.bigflymobi.com/v1/api/event?event_name=yogqjh&adv_click_id={click_id}"
                 
                 # Random IP Generator for Rapid Rupee (New)
                 random_ip = f"{random.randint(103, 199)}.{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}"
@@ -322,7 +322,6 @@ def webhook():
                 raw_response = pb_res.text.strip()
                 pb_status = f"Status {pb_res.status_code}"
                 
-                # Security: Hide Postback URL from user response
                 if "http://" in raw_response or "https://" in raw_response:
                     pb_response_text = "Success (URL hidden)"
                 else:
@@ -380,131 +379,32 @@ def webhook():
             edit_message(chat_id, message_id, "⚠️ *Access Denied!*\n\nYou must join our channel first to use this bot.", reply_markup=get_join_keyboard())
             return "OK", 200
 
+        task_mapping = {
+            "select_task_grow": "Grow",
+            "select_task_solitaire": "Solitaire",
+            "select_task_policy": "Policy Bazaar",
+            "select_task_policy2": "Policy Bazaar 2",
+            "select_task_jar": "Jar",
+            "select_task_rapid_new": "Rapid Rupee (New)",
+            "select_task_xm360": "Xm360",
+            "select_task_bharatpe": "Bharat Pe",
+            "select_task_condivio": "Condivio",
+            "select_task_uni": "Uni",
+            "select_task_amazon": "Amazon",
+            "select_task_vivago": "Vivago",
+            "select_task_rapid": "Rapid Rupee",
+            "select_task_novio": "Novio",
+            "select_task_aspro": "Aspro Bonds",
+            "select_task_truemads": "Truemads",
+            "select_task_incred": "Incred",
+            "select_task_candy": "Candy Crush"
+        }
+
         if data_str == "start_menu":
             welcome_text = "🚀 *Select Task*\n\n👉 *Choose task below*"
             edit_message(chat_id, message_id, welcome_text, reply_markup=get_tasks_keyboard())
-            
-        elif data_str == "select_task_grow":
-            selected_task = "Grow"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `http://click.hopemobi.net/`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-            
-        elif data_str == "select_task_solitaire":
-            selected_task = "Solitaire"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.adjust.com/`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-            
-        elif data_str == "select_task_policy":
-            selected_task = "Policy Bazaar"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://t.clickscot.com/`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_policy2":
-            selected_task = "Policy Bazaar 2"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `http://kswj.unionapps.info/`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_jar":
-            selected_task = "Jar"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://mobavenue.go2affise.com/click`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_rapid_new":
-            selected_task = "Rapid Rupee (New)"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://appsflyer.com`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_xm360":
-            selected_task = "Xm360"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.appsflyer.com`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_bharatpe":
-            selected_task = "Bharat Pe"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.appsflyer.com`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-            
-        elif data_str == "select_task_condivio":
-            selected_task = "Condivio"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://track.paddlewaver.com/`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_uni":
-            selected_task = "Uni"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://track.paddlewaver.com/`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_amazon":
-            selected_task = "Amazon"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://t.clickscot.com`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_vivago":
-            selected_task = "Vivago"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.adjust.com`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_rapid":
-            selected_task = "Rapid Rupee"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://t.clickscot.com`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_novio":
-            selected_task = "Novio"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://t.clickscot.com`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_aspro":
-            selected_task = "Aspro Bonds"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://track.paddlewaver.com`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_truemads":
-            selected_task = "Truemads"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://track.paddlewaver.com`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_incred":
-            selected_task = "Incred"
-            user_tasks[chat_id] = selected_task
-            text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://track.paddlewaver.com`"
-            keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
-            edit_message(chat_id, message_id, text, reply_markup=keyboard)
-
-        elif data_str == "select_task_candy":
-            selected_task = "Candy Crush"
+        elif data_str in task_mapping:
+            selected_task = task_mapping[data_str]
             user_tasks[chat_id] = selected_task
             text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.appsflyer.com`"
             keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
@@ -515,3 +415,4 @@ def webhook():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+                        
