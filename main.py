@@ -5,7 +5,7 @@ import requests
 from urllib.parse import urlparse, parse_qs, unquote
 from flask import Flask, request, jsonify
 
-TOKEN = "8874819641:AAFEFdew30UrcZfsvfZHtBsHA4duKnRnQA4"
+TOKEN = "8874819641:AAEh685J2apsLj9cgIoeGXKt0NFcgZURl20"
 URL = f"https://api.telegram.org/bot{TOKEN}/"
 
 # Force Channel Join Settings
@@ -90,7 +90,7 @@ def webhook():
         if not data:
             return "OK", 200
         
-        print(f"Received Update: {data}")  # Debug print to check incoming requests
+        print(f"Received Update: {data}")
         
         if "message" in data:
             chat_id = data["message"]["chat"]["id"]
@@ -251,7 +251,7 @@ def webhook():
             query_id = cq["id"]
             data_str = cq["data"]
             
-            print(f"Callback Clicked: {data_str}") # Debug print for button clicks
+            print(f"Callback Clicked: {data_str}")
             
             try:
                 requests.post(URL + "answerCallbackQuery", json={"callback_query_id": query_id}, timeout=5)
@@ -317,4 +317,4 @@ def webhook():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
-                    
+                
