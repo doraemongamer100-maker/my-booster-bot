@@ -90,6 +90,8 @@ def webhook():
         if not data:
             return "OK", 200
         
+        print(f"Received Update: {data}")  # Debug print to check incoming requests
+        
         if "message" in data:
             chat_id = data["message"]["chat"]["id"]
             text = data["message"].get("text", "")
@@ -248,6 +250,8 @@ def webhook():
             message_id = cq["message"]["message_id"]
             query_id = cq["id"]
             data_str = cq["data"]
+            
+            print(f"Callback Clicked: {data_str}") # Debug print for button clicks
             
             try:
                 requests.post(URL + "answerCallbackQuery", json={"callback_query_id": query_id}, timeout=5)
