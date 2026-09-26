@@ -75,7 +75,8 @@ def get_tasks_keyboard():
             [{"text": "15. Jar", "callback_data": "select_task_jar"}],
             [{"text": "16. Rapid Rupee (New)", "callback_data": "select_task_rapid_new"}],
             [{"text": "17. Xm360", "callback_data": "select_task_xm360"}],
-            [{"text": "18. Bharat Pe", "callback_data": "select_task_bharatpe"}]
+            [{"text": "18. Bharat Pe", "callback_data": "select_task_bharatpe"}],
+            [{"text": "19. FirstCry", "callback_data": "select_task_firstcry"}]
         ]
     }
 
@@ -167,6 +168,15 @@ def webhook():
                         except: pass
                     postback_url = f"https://offers-mobtions.affise.com/postback?goal=first_txn_success&clickid={click_id}"
 
+                elif selected_task == "FirstCry":
+                    if "clickid=" in text:
+                        try: click_id = text.split("clickid=")[1].split("&")[0]
+                        except: pass
+                    elif "aff_sub1=" in text:
+                        try: click_id = text.split("aff_sub1=")[1].split("&")[0]
+                        except: pass
+                    postback_url = f"http://cpipb.melodong.com?adv=1000444&clickid={click_id}"
+
                 elif selected_task in ["Solitaire", "Policy Bazaar", "Amazon", "Rapid Rupee", "Novio", "Candy Crush"]:
                     if "clickid=" in text:
                         try: click_id = text.split("clickid=")[1].split("&")[0]
@@ -239,7 +249,6 @@ def webhook():
             query_id = cq["id"]
             data_str = cq["data"]
             
-            # Immediately answer callback query to stop loading animation on button
             try:
                 requests.post(URL + "answerCallbackQuery", json={"callback_query_id": query_id}, timeout=5)
             except:
@@ -273,6 +282,7 @@ def webhook():
                 "select_task_rapid_new": "Rapid Rupee (New)",
                 "select_task_xm360": "Xm360",
                 "select_task_bharatpe": "Bharat Pe",
+                "select_task_firstcry": "FirstCry",
                 "select_task_condivio": "Condivio",
                 "select_task_uni": "Uni",
                 "select_task_amazon": "Amazon",
@@ -291,7 +301,7 @@ def webhook():
             elif data_str in task_mapping:
                 selected_task = task_mapping[data_str]
                 user_tasks[chat_id] = selected_task
-                text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://app.appsflyer.com`"
+                text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://toptopoffer.linkrall-trk.com/`"
                 keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
                 edit_message(chat_id, message_id, text, reply_markup=keyboard)
                 
@@ -303,4 +313,4 @@ def webhook():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
-                        
+                    
