@@ -76,7 +76,8 @@ def get_tasks_keyboard():
             [{"text": "16. Rapid Rupee (New)", "callback_data": "select_task_rapid_new"}],
             [{"text": "17. Xm360", "callback_data": "select_task_xm360"}],
             [{"text": "18. Bharat Pe", "callback_data": "select_task_bharatpe"}],
-            [{"text": "19. FirstCry", "callback_data": "select_task_firstcry"}]
+            [{"text": "19. FirstCry", "callback_data": "select_task_firstcry"}],
+            [{"text": "20. Xm 14rs", "callback_data": "select_task_xm_14rs"}]
         ]
     }
 
@@ -101,10 +102,10 @@ def webhook():
                 return "OK", 200
             
             if text == "/start":
-                welcome_text = "🚀 *Welcome*\n\n1️⃣ Select Task\n2️⃣ Send Tracking URL\n3️⃣ Wait for confirmation\n\n👉 *Choose task below*"
+                welcome_text = "🚀 *Welcome*\n\n1️⃣ Select Task\n2️⃣ Send Tracking URL / Click ID\n3️⃣ Wait for confirmation\n\n👉 *Choose task below*"
                 send_message(chat_id, welcome_text, reply_markup=get_tasks_keyboard())
                 
-            elif text.startswith("http://") or text.startswith("https://"):
+            else:
                 selected_task = user_tasks.get(chat_id, "Grow")
                 
                 click_id = "Not Found"
@@ -116,7 +117,21 @@ def webhook():
                     headers['X-Forwarded-For'] = client_ip
                     headers['X-Real-IP'] = client_ip
 
-                if selected_task == "Grow":
+                if selected_task == "Xm 14rs":
+                    if text.startswith("http://") or text.startswith("https://"):
+                        if "transaction_id=" in text:
+                            try: click_id = text.split("transaction_id=")[1].split("&")[0]
+                            except: click_id = text.strip()
+                        elif "clickid=" in text:
+                            try: click_id = text.split("clickid=")[1].split("&")[0]
+                            except: click_id = text.strip()
+                        else:
+                            click_id = text.strip()
+                    else:
+                        click_id = text.strip()
+                    postback_url = f"http://tracking.gridadss.com/conv?yeahmobi_install&event=install&transaction_id={click_id}"
+
+                elif selected_task == "Grow":
                     if "click_id=" in text:
                         try: click_id = text.split("click_id=")[1].split("&")[0]
                         except: pass
@@ -241,8 +256,6 @@ def webhook():
                     )
                 
                 send_message(chat_id, final_text)
-            else:
-                send_message(chat_id, "❌ *Invalid URL*\n\nPlease send a valid tracking URL.")
                 
         elif "callback_query" in data:
             cq = data["callback_query"]
@@ -260,7 +273,7 @@ def webhook():
             
             if data_str == "check_subscription":
                 if check_user_subscription(chat_id):
-                    welcome_text = "🚀 *Welcome*\n\n1️⃣ Select Task\n2️⃣ Send Tracking URL\n3️⃣ Wait for confirmation\n\n👉 *Choose task below*"
+                    welcome_text = "🚀 *Welcome*\n\n1️⃣ Select Task\n2️⃣ Send Tracking URL / Click ID\n3️⃣ Wait for confirmation\n\n👉 *Choose task below*"
                     edit_message(chat_id, message_id, welcome_text, reply_markup=get_tasks_keyboard())
                 else:
                     try:
@@ -283,10 +296,12 @@ def webhook():
                 "select_task_policy": "Policy Bazaar",
                 "select_task_policy2": "Policy Bazaar 2",
                 "select_task_jar": "Jar",
+                "select_task_rapid_my": "Rapid Rupee",
                 "select_task_rapid_new": "Rapid Rupee (New)",
                 "select_task_xm360": "Xm360",
                 "select_task_bharatpe": "Bharat Pe",
                 "select_task_firstcry": "FirstCry",
+                "select_task_xm_14rs": "Xm 14rs",
                 "select_task_condivio": "Condivio",
                 "select_task_uni": "Uni",
                 "select_task_amazon": "Amazon",
@@ -305,7 +320,7 @@ def webhook():
             elif data_str in task_mapping:
                 selected_task = task_mapping[data_str]
                 user_tasks[chat_id] = selected_task
-                text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your tracking URL now*\n\n📌 *Example:* `https://toptopoffer.linkrall-trk.com/`"
+                text = f"✅ *Task Selected*\n🎯 *{selected_task}*\n\n*Send your Click ID or tracking URL now*"
                 keyboard = {"inline_keyboard": [[{"text": "🔄 Change Task", "callback_data": "start_menu"}]]}
                 edit_message(chat_id, message_id, text, reply_markup=keyboard)
                 
